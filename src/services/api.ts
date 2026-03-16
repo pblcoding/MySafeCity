@@ -2,8 +2,8 @@ import { User, SOSAlert, CrimeReport, EmergencyService, Notification, DashboardS
 
 // Mock users
 const users: User[] = [
-  { _id: '1', name: 'John Citizen', email: 'john@example.com', role: 'citizen', phone: '+1234567890', createdAt: '2024-01-15' },
-  { _id: '2', name: 'Admin User', email: 'admin@mysafecity.com', role: 'admin', createdAt: '2024-01-01' },
+  { _id: '1', name: 'Rahul Sharma', email: 'rahul@example.com', role: 'citizen', phone: '+91-9876543210', createdAt: '2024-01-15' },
+  { _id: '2', name: 'Admin User', email: 'admin@mysafecity.com', role: 'admin', phone: '+91-9000000001', createdAt: '2024-01-01' },
 ];
 
 // Center point: Mumbai, India
