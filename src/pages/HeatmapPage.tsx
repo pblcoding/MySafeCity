@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 import { api } from '@/services/api';
 import type { HeatmapPoint, CrimeReport } from '@/types';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const riskColors = {
@@ -22,16 +22,62 @@ export default function HeatmapPage() {
   const [points, setPoints] = useState<HeatmapPoint[]>([]);
   const [reports, setReports] = useState<CrimeReport[]>([]);
   const [filter, setFilter] = useState<string>('all');
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const layerGroupRef = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
     api.getHeatmapData().then(setPoints);
     api.getCrimeReports().then(setReports);
   }, []);
 
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+    const map = L.map(mapContainerRef.current).setView([19.076, 72.8777], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+    layerGroupRef.current = L.layerGroup().addTo(map);
+    mapRef.current = map;
+    return () => { map.remove(); mapRef.current = null; };
+  }, []);
+
   const filteredPoints = useMemo(() => {
     if (filter === 'all') return points;
     return points.filter(p => p.type === filter);
   }, [points, filter]);
+
+  // Update markers
+  useEffect(() => {
+    if (!layerGroupRef.current) return;
+    layerGroupRef.current.clearLayers();
+
+    filteredPoints.forEach(point => {
+      const colors = getColor(point.intensity);
+      L.circleMarker([point.lat, point.lng], {
+        radius: point.intensity * 25 + 8,
+        fillColor: colors.fill,
+        color: colors.stroke,
+        weight: 2,
+        fillOpacity: 0.4,
+      })
+        .bindPopup(`<div class="text-sm"><p class="font-bold" style="text-transform:capitalize">${point.type}</p><p>Risk: ${point.intensity >= 0.7 ? 'High' : point.intensity >= 0.4 ? 'Medium' : 'Low'}</p></div>`)
+        .addTo(layerGroupRef.current!);
+    });
+
+    reports.forEach(r => {
+      L.circleMarker([r.location.lat, r.location.lng], {
+        radius: 6,
+        fillColor: r.severity === 'high' ? '#ef4444' : r.severity === 'medium' ? '#f59e0b' : '#22c55e',
+        color: '#fff',
+        weight: 2,
+        fillOpacity: 0.9,
+      })
+        .bindPopup(`<div class="text-sm"><p class="font-bold">${r.title}</p><p style="text-transform:capitalize">${r.type} · ${r.severity}</p><p class="text-xs">${r.location.address || ''}</p></div>`)
+        .addTo(layerGroupRef.current!);
+    });
+  }, [filteredPoints, reports]);
 
   const types = ['all', 'theft', 'assault', 'vandalism', 'robbery', 'fraud', 'harassment'];
 
@@ -75,56 +121,7 @@ export default function HeatmapPage() {
 
           {/* Map */}
           <div className="rounded-2xl overflow-hidden border border-border shadow-lg" style={{ height: '65vh' }}>
-            <MapContainer center={[19.076, 72.8777]} zoom={12} style={{ height: '100%', width: '100%' }}>
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              {filteredPoints.map((point, i) => {
-                const colors = getColor(point.intensity);
-                return (
-                  <CircleMarker
-                    key={i}
-                    center={[point.lat, point.lng]}
-                    radius={point.intensity * 25 + 8}
-                    pathOptions={{
-                      fillColor: colors.fill,
-                      color: colors.stroke,
-                      weight: 2,
-                      fillOpacity: 0.4,
-                    }}
-                  >
-                    <Popup>
-                      <div className="text-sm">
-                        <p className="font-bold capitalize">{point.type}</p>
-                        <p>Risk: {point.intensity >= 0.7 ? 'High' : point.intensity >= 0.4 ? 'Medium' : 'Low'}</p>
-                      </div>
-                    </Popup>
-                  </CircleMarker>
-                );
-              })}
-              {reports.map(r => (
-                <CircleMarker
-                  key={r._id}
-                  center={[r.location.lat, r.location.lng]}
-                  radius={6}
-                  pathOptions={{
-                    fillColor: r.severity === 'high' ? '#ef4444' : r.severity === 'medium' ? '#f59e0b' : '#22c55e',
-                    color: '#fff',
-                    weight: 2,
-                    fillOpacity: 0.9,
-                  }}
-                >
-                  <Popup>
-                    <div className="text-sm">
-                      <p className="font-bold">{r.title}</p>
-                      <p className="capitalize">{r.type} · {r.severity}</p>
-                      <p className="text-xs">{r.location.address}</p>
-                    </div>
-                  </Popup>
-                </CircleMarker>
-              ))}
-            </MapContainer>
+            <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
           </div>
         </motion.div>
       </div>

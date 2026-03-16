@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Shield as ShieldIcon, Siren, Flame, Hospital, Navigation, ExternalLink } from 'lucide-react';
 import { api } from '@/services/api';
@@ -13,25 +12,51 @@ const iconMap = {
   fire: { icon: Flame, color: 'text-emergency', bg: 'bg-emergency/10' },
 };
 
-function createIcon(type: EmergencyService['type']) {
-  const colors = { police: '#2563eb', hospital: '#22c55e', fire: '#ef4444' };
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `<div style="background:${colors[type]};width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-  });
-}
+const markerColors: Record<string, string> = { police: '#2563eb', hospital: '#22c55e', fire: '#ef4444' };
 
 export default function EmergencyServicesPage() {
   const [services, setServices] = useState<EmergencyService[]>([]);
   const [filter, setFilter] = useState<string>('all');
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const layerGroupRef = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
     api.getEmergencyServices().then(setServices);
   }, []);
 
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+    const map = L.map(mapContainerRef.current).setView([19.076, 72.8777], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+    layerGroupRef.current = L.layerGroup().addTo(map);
+    mapRef.current = map;
+    return () => { map.remove(); mapRef.current = null; };
+  }, []);
+
   const filtered = filter === 'all' ? services : services.filter(s => s.type === filter);
+
+  // Update markers
+  useEffect(() => {
+    if (!layerGroupRef.current) return;
+    layerGroupRef.current.clearLayers();
+
+    filtered.forEach(s => {
+      const color = markerColors[s.type] || '#2563eb';
+      const icon = L.divIcon({
+        className: 'custom-marker',
+        html: `<div style="background:${color};width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+      L.marker([s.location.lat, s.location.lng], { icon })
+        .bindPopup(`<div class="text-sm"><p class="font-bold">${s.name}</p><p>${s.address}</p><p>${s.phone}</p></div>`)
+        .addTo(layerGroupRef.current!);
+    });
+  }, [filtered]);
 
   return (
     <div className="min-h-screen pt-[var(--nav-height)] py-10 px-4">
@@ -59,23 +84,7 @@ export default function EmergencyServicesPage() {
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Map */}
             <div className="rounded-2xl overflow-hidden border border-border shadow-lg" style={{ height: '500px' }}>
-              <MapContainer center={[19.076, 72.8777]} zoom={12} style={{ height: '100%', width: '100%' }}>
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                {filtered.map(s => (
-                  <Marker key={s._id} position={[s.location.lat, s.location.lng]} icon={createIcon(s.type)}>
-                    <Popup>
-                      <div className="text-sm">
-                        <p className="font-bold">{s.name}</p>
-                        <p>{s.address}</p>
-                        <p>{s.phone}</p>
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
+              <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
             </div>
 
             {/* List */}
@@ -97,7 +106,7 @@ export default function EmergencyServicesPage() {
                           <Phone className="h-3 w-3" />{s.phone}
                         </a>
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Navigation className="h-3 w-3" />{s.distance} mi
+                          <Navigation className="h-3 w-3" />{s.distance} km
                         </span>
                       </div>
                     </div>
