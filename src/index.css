@@ -115,11 +115,42 @@
   .glass-card {
     @apply bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg;
   }
+  .glass-card-hover {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg 
+           transition-all duration-300 ease-out
+           hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 hover:-translate-y-1;
+  }
   .pulse-emergency {
     animation: pulse-red 1.5s ease-in-out infinite;
   }
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400;
+  }
+  .gradient-text-warm {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-warning to-emergency;
+  }
+  .gradient-text-success {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-success to-emerald-400;
+  }
+  .shimmer {
+    background: linear-gradient(110deg, transparent 33%, hsl(var(--primary) / 0.08) 50%, transparent 67%);
+    background-size: 300% 100%;
+    animation: shimmer 3s infinite;
+  }
+  .stat-card {
+    @apply relative overflow-hidden rounded-2xl p-6 border border-border/50 bg-card/80 backdrop-blur-xl
+           transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: inherit;
+  }
+  .stat-card:hover::before {
+    opacity: 1;
   }
 }
 
@@ -130,4 +161,14 @@
   50% {
     box-shadow: 0 0 0 20px hsl(0 90% 50% / 0);
   }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
 }
