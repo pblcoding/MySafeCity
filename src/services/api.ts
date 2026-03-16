@@ -2,59 +2,59 @@ import { User, SOSAlert, CrimeReport, EmergencyService, Notification, DashboardS
 
 // Mock users
 const users: User[] = [
-  { _id: '1', name: 'John Citizen', email: 'john@example.com', role: 'citizen', phone: '+1234567890', createdAt: '2024-01-15' },
-  { _id: '2', name: 'Admin User', email: 'admin@mysafecity.com', role: 'admin', createdAt: '2024-01-01' },
+  { _id: '1', name: 'Rahul Sharma', email: 'rahul@example.com', role: 'citizen', phone: '+91-9876543210', createdAt: '2024-01-15' },
+  { _id: '2', name: 'Admin User', email: 'admin@mysafecity.com', role: 'admin', phone: '+91-9000000001', createdAt: '2024-01-01' },
 ];
 
-// Center point: New York City
-const CENTER = { lat: 40.7128, lng: -74.006 };
+// Center point: Mumbai, India
+const CENTER = { lat: 19.076, lng: 72.8777 };
 
 const mockSOSAlerts: SOSAlert[] = [
-  { _id: 's1', userId: '1', userName: 'John Citizen', location: { lat: 40.7580, lng: -73.9855, address: 'Times Square, NYC' }, status: 'active', createdAt: new Date(Date.now() - 120000).toISOString() },
-  { _id: 's2', userId: '3', userName: 'Sarah Miller', location: { lat: 40.7489, lng: -73.9680, address: 'Grand Central, NYC' }, status: 'responding', createdAt: new Date(Date.now() - 600000).toISOString() },
-  { _id: 's3', userId: '4', userName: 'Mike Johnson', location: { lat: 40.7614, lng: -73.9776, address: 'Rockefeller Center, NYC' }, status: 'resolved', createdAt: new Date(Date.now() - 3600000).toISOString(), resolvedAt: new Date(Date.now() - 1800000).toISOString() },
+  { _id: 's1', userId: '1', userName: 'Rahul Sharma', location: { lat: 19.0760, lng: 72.8777, address: 'Gateway of India, Mumbai' }, status: 'active', createdAt: new Date(Date.now() - 120000).toISOString() },
+  { _id: 's2', userId: '3', userName: 'Priya Patel', location: { lat: 19.0990, lng: 72.8638, address: 'Dadar Station, Mumbai' }, status: 'responding', createdAt: new Date(Date.now() - 600000).toISOString() },
+  { _id: 's3', userId: '4', userName: 'Amit Kumar', location: { lat: 19.0178, lng: 72.8478, address: 'Bandra Kurla Complex, Mumbai' }, status: 'resolved', createdAt: new Date(Date.now() - 3600000).toISOString(), resolvedAt: new Date(Date.now() - 1800000).toISOString() },
 ];
 
 const crimeTypes: CrimeReport['type'][] = ['theft', 'assault', 'vandalism', 'robbery', 'fraud', 'harassment', 'other'];
 
 const mockCrimeReports: CrimeReport[] = [
-  { _id: 'c1', userId: '1', userName: 'John Citizen', type: 'theft', title: 'Phone stolen at subway', description: 'Someone grabbed my phone while boarding the train at 14th St station.', location: { lat: 40.7368, lng: -73.9927, address: '14th St Station' }, status: 'approved', severity: 'medium', createdAt: '2024-12-10T14:30:00Z' },
-  { _id: 'c2', userId: '3', userName: 'Sarah Miller', type: 'vandalism', title: 'Car window smashed', description: 'Parked car had window smashed overnight. Nothing taken.', location: { lat: 40.7282, lng: -73.7949, address: 'Queens Blvd' }, status: 'pending', severity: 'low', createdAt: '2024-12-12T08:00:00Z' },
-  { _id: 'c3', userId: '4', userName: 'Mike Johnson', type: 'assault', title: 'Mugging near Central Park', description: 'Was threatened at knifepoint near the park entrance.', location: { lat: 40.7829, lng: -73.9654, address: 'Central Park West' }, status: 'investigating', severity: 'high', createdAt: '2024-12-14T22:15:00Z' },
-  { _id: 'c4', userId: '5', userName: 'Lisa Chen', type: 'robbery', title: 'Store robbery on 5th Ave', description: 'Armed robbery at convenience store.', location: { lat: 40.7527, lng: -73.9772, address: '5th Avenue' }, status: 'approved', severity: 'high', createdAt: '2024-12-15T03:45:00Z' },
-  { _id: 'c5', userId: '6', userName: 'David Brown', type: 'fraud', title: 'ATM skimming device', description: 'Found a skimming device on ATM machine.', location: { lat: 40.7484, lng: -73.9857, address: 'Herald Square' }, status: 'approved', severity: 'medium', createdAt: '2024-12-16T11:20:00Z' },
-  { _id: 'c6', userId: '7', userName: 'Emma Wilson', type: 'harassment', title: 'Street harassment incident', description: 'Verbal harassment near subway exit.', location: { lat: 40.7061, lng: -74.0087, address: 'Fulton St' }, status: 'pending', severity: 'medium', createdAt: '2024-12-17T19:30:00Z' },
+  { _id: 'c1', userId: '1', userName: 'Rahul Sharma', type: 'theft', title: 'Mobile snatched at station', description: 'Someone snatched my phone while boarding the local train at Churchgate.', location: { lat: 18.9352, lng: 72.8274, address: 'Churchgate Station, Mumbai' }, status: 'approved', severity: 'medium', createdAt: '2024-12-10T14:30:00Z' },
+  { _id: 'c2', userId: '3', userName: 'Priya Patel', type: 'vandalism', title: 'Car window smashed in parking', description: 'Parked car had window smashed overnight in society parking.', location: { lat: 19.1197, lng: 72.9051, address: 'Powai, Mumbai' }, status: 'pending', severity: 'low', createdAt: '2024-12-12T08:00:00Z' },
+  { _id: 'c3', userId: '4', userName: 'Amit Kumar', type: 'assault', title: 'Mugging near Juhu Beach', description: 'Was threatened at knifepoint near the beach entrance.', location: { lat: 19.0948, lng: 72.8267, address: 'Juhu Beach, Mumbai' }, status: 'investigating', severity: 'high', createdAt: '2024-12-14T22:15:00Z' },
+  { _id: 'c4', userId: '5', userName: 'Sneha Reddy', type: 'robbery', title: 'Shop robbery at Linking Road', description: 'Armed robbery at jewellery shop.', location: { lat: 19.0700, lng: 72.8334, address: 'Linking Road, Bandra' }, status: 'approved', severity: 'high', createdAt: '2024-12-15T03:45:00Z' },
+  { _id: 'c5', userId: '6', userName: 'Deepak Verma', type: 'fraud', title: 'ATM skimming device found', description: 'Found a skimming device on ATM machine near station.', location: { lat: 19.0540, lng: 72.8402, address: 'Mahim Station, Mumbai' }, status: 'approved', severity: 'medium', createdAt: '2024-12-16T11:20:00Z' },
+  { _id: 'c6', userId: '7', userName: 'Anjali Desai', type: 'harassment', title: 'Street harassment incident', description: 'Verbal harassment near railway station exit.', location: { lat: 18.9400, lng: 72.8356, address: 'CST Station, Mumbai' }, status: 'pending', severity: 'medium', createdAt: '2024-12-17T19:30:00Z' },
 ];
 
 const mockEmergencyServices: EmergencyService[] = [
-  { _id: 'e1', name: 'NYPD 1st Precinct', type: 'police', location: { lat: 40.7135, lng: -74.0078 }, address: '16 Ericsson Pl, New York', phone: '212-334-0611', distance: 0.8 },
-  { _id: 'e2', name: 'NYPD Midtown South', type: 'police', location: { lat: 40.7505, lng: -73.9934 }, address: '357 W 35th St, New York', phone: '212-239-9811', distance: 2.1 },
-  { _id: 'e3', name: 'Bellevue Hospital', type: 'hospital', location: { lat: 40.7392, lng: -73.9754 }, address: '462 1st Ave, New York', phone: '212-562-4141', distance: 1.5 },
-  { _id: 'e4', name: 'NYU Langone Health', type: 'hospital', location: { lat: 40.7421, lng: -73.9739 }, address: '550 1st Ave, New York', phone: '212-263-7300', distance: 1.8 },
-  { _id: 'e5', name: 'FDNY Engine 1', type: 'fire', location: { lat: 40.7425, lng: -73.9958 }, address: '142 W 31st St, New York', phone: '212-570-4300', distance: 1.2 },
-  { _id: 'e6', name: 'FDNY Ladder 24', type: 'fire', location: { lat: 40.7614, lng: -73.9858 }, address: '227 W 43rd St, New York', phone: '212-570-4300', distance: 3.0 },
+  { _id: 'e1', name: 'Colaba Police Station', type: 'police', location: { lat: 18.9220, lng: 72.8347 }, address: 'Shahid Bhagat Singh Rd, Colaba, Mumbai', phone: '022-22821855', distance: 0.8 },
+  { _id: 'e2', name: 'Bandra Police Station', type: 'police', location: { lat: 19.0544, lng: 72.8402 }, address: 'Hill Road, Bandra West, Mumbai', phone: '022-26422242', distance: 2.1 },
+  { _id: 'e3', name: 'KEM Hospital', type: 'hospital', location: { lat: 19.0003, lng: 72.8416 }, address: 'Acharya Donde Marg, Parel, Mumbai', phone: '022-24107000', distance: 1.5 },
+  { _id: 'e4', name: 'Lilavati Hospital', type: 'hospital', location: { lat: 19.0509, lng: 72.8289 }, address: 'A-791, Bandra Reclamation, Mumbai', phone: '022-26568000', distance: 1.8 },
+  { _id: 'e5', name: 'Byculla Fire Station', type: 'fire', location: { lat: 18.9785, lng: 72.8330 }, address: 'Dr Babasaheb Ambedkar Rd, Byculla, Mumbai', phone: '022-23086181', distance: 1.2 },
+  { _id: 'e6', name: 'Dadar Fire Station', type: 'fire', location: { lat: 19.0178, lng: 72.8440 }, address: 'Senapati Bapat Marg, Dadar, Mumbai', phone: '022-24321958', distance: 3.0 },
 ];
 
 const mockNotifications: Notification[] = [
-  { _id: 'n1', type: 'sos', title: 'SOS Alert Nearby', message: 'An emergency alert was triggered near Times Square.', read: false, createdAt: new Date(Date.now() - 60000).toISOString() },
+  { _id: 'n1', type: 'sos', title: 'SOS Alert Nearby', message: 'An emergency alert was triggered near Gateway of India.', read: false, createdAt: new Date(Date.now() - 60000).toISOString() },
   { _id: 'n2', type: 'crime', title: 'Crime Report Update', message: 'Your report #c1 has been approved by admin.', read: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
-  { _id: 'n3', type: 'alert', title: 'Safety Advisory', message: 'Increased police presence in Midtown area tonight.', read: true, createdAt: new Date(Date.now() - 86400000).toISOString() },
+  { _id: 'n3', type: 'alert', title: 'Safety Advisory', message: 'Increased police presence in Bandra area tonight.', read: true, createdAt: new Date(Date.now() - 86400000).toISOString() },
   { _id: 'n4', type: 'system', title: 'Welcome to MySafeCity', message: 'Your account has been created. Stay safe!', read: true, createdAt: new Date(Date.now() - 172800000).toISOString() },
 ];
 
 const mockHeatmapPoints: HeatmapPoint[] = [
-  { lat: 40.7580, lng: -73.9855, intensity: 0.9, type: 'theft' },
-  { lat: 40.7489, lng: -73.9680, intensity: 0.7, type: 'assault' },
-  { lat: 40.7368, lng: -73.9927, intensity: 0.5, type: 'theft' },
-  { lat: 40.7282, lng: -73.7949, intensity: 0.3, type: 'vandalism' },
-  { lat: 40.7829, lng: -73.9654, intensity: 0.8, type: 'assault' },
-  { lat: 40.7527, lng: -73.9772, intensity: 0.9, type: 'robbery' },
-  { lat: 40.7484, lng: -73.9857, intensity: 0.6, type: 'fraud' },
-  { lat: 40.7061, lng: -74.0087, intensity: 0.4, type: 'harassment' },
-  { lat: 40.7200, lng: -73.9900, intensity: 0.7, type: 'theft' },
-  { lat: 40.7650, lng: -73.9800, intensity: 0.5, type: 'vandalism' },
-  { lat: 40.7300, lng: -74.0000, intensity: 0.8, type: 'robbery' },
-  { lat: 40.7450, lng: -73.9900, intensity: 0.6, type: 'assault' },
+  { lat: 19.0760, lng: 72.8777, intensity: 0.9, type: 'theft' },
+  { lat: 19.0990, lng: 72.8638, intensity: 0.7, type: 'assault' },
+  { lat: 18.9352, lng: 72.8274, intensity: 0.5, type: 'theft' },
+  { lat: 19.1197, lng: 72.9051, intensity: 0.3, type: 'vandalism' },
+  { lat: 19.0948, lng: 72.8267, intensity: 0.8, type: 'assault' },
+  { lat: 19.0700, lng: 72.8334, intensity: 0.9, type: 'robbery' },
+  { lat: 19.0540, lng: 72.8402, intensity: 0.6, type: 'fraud' },
+  { lat: 18.9400, lng: 72.8356, intensity: 0.4, type: 'harassment' },
+  { lat: 19.0003, lng: 72.8416, intensity: 0.7, type: 'theft' },
+  { lat: 19.0509, lng: 72.8289, intensity: 0.5, type: 'vandalism' },
+  { lat: 18.9785, lng: 72.8330, intensity: 0.8, type: 'robbery' },
+  { lat: 19.0178, lng: 72.8440, intensity: 0.6, type: 'assault' },
 ];
 
 const mockDashboardStats: DashboardStats = {

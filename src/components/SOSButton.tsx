@@ -27,7 +27,7 @@ export default function SOSButton() {
     } catch {
       // Fallback to default location
       setState('sending');
-      await api.triggerSOS({ lat: 40.7128, lng: -74.006 });
+      await api.triggerSOS({ lat: 19.076, lng: 72.8777 });
       setState('sent');
       setTimeout(() => setState('idle'), 3000);
     }

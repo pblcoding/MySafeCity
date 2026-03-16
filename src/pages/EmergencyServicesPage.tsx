@@ -59,7 +59,7 @@ export default function EmergencyServicesPage() {
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Map */}
             <div className="rounded-2xl overflow-hidden border border-border shadow-lg" style={{ height: '500px' }}>
-              <MapContainer center={[40.7128, -74.006]} zoom={12} style={{ height: '100%', width: '100%' }}>
+              <MapContainer center={[19.076, 72.8777]} zoom={12} style={{ height: '100%', width: '100%' }}>
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
