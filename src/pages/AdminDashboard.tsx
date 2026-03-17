@@ -375,7 +375,8 @@ export default function AdminDashboard() {
               {reports.length === 0 && <p className="text-center text-muted-foreground py-10">No reports</p>}
               {reports.map((r, i) => (
                 <motion.div key={r._id} custom={i} variants={fadeUp} initial="hidden" animate="visible"
-                  className="glass-card-hover rounded-xl p-4 flex items-center gap-4 group">
+                  className="glass-card-hover rounded-xl p-4 flex items-center gap-4 group cursor-pointer"
+                  onClick={() => setSelectedReport(r)}>
                   <div className={`p-2.5 rounded-xl shrink-0 transition-transform duration-200 group-hover:scale-110 ${
                     r.severity === 'high' ? 'bg-emergency/10' : r.severity === 'medium' ? 'bg-warning/10' : 'bg-success/10'
                   }`}>
@@ -395,7 +396,7 @@ export default function AdminDashboard() {
                     'bg-warning/10 text-warning border border-warning/20'
                   }`}>{r.status}</span>
                   {r.status === 'pending' && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                       <button onClick={() => handleReportAction(r._id, 'approved')} 
                         className="p-2 rounded-lg bg-success/10 hover:bg-success/20 border border-success/20 transition-all active:scale-90">
                         <CheckCircle className="h-4 w-4 text-success" />
@@ -408,6 +409,89 @@ export default function AdminDashboard() {
                   )}
                 </motion.div>
               ))}
+
+              {/* Report Detail Dialog */}
+              <Dialog open={!!selectedReport} onOpenChange={(open) => !open && setSelectedReport(null)}>
+                <DialogContent className="max-w-lg">
+                  {selectedReport && (
+                    <>
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-primary" />
+                          {selectedReport.title}
+                        </DialogTitle>
+                        <DialogDescription>Crime Report Details</DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 mt-2">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="p-3 rounded-xl bg-secondary/50">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Type</p>
+                            <p className="text-sm font-semibold capitalize flex items-center gap-1.5">
+                              <Tag className="h-3.5 w-3.5 text-primary" />{selectedReport.type}
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-xl bg-secondary/50">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Severity</p>
+                            <p className={`text-sm font-semibold capitalize ${
+                              selectedReport.severity === 'high' ? 'text-emergency' : selectedReport.severity === 'medium' ? 'text-warning' : 'text-success'
+                            }`}>{selectedReport.severity}</p>
+                          </div>
+                          <div className="p-3 rounded-xl bg-secondary/50">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Status</p>
+                            <p className="text-sm font-semibold capitalize">{selectedReport.status}</p>
+                          </div>
+                          <div className="p-3 rounded-xl bg-secondary/50">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Date</p>
+                            <p className="text-sm font-semibold flex items-center gap-1.5">
+                              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                              {new Date(selectedReport.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-secondary/50">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Reported By</p>
+                          <p className="text-sm font-semibold flex items-center gap-1.5">
+                            <User className="h-3.5 w-3.5 text-primary" />{selectedReport.userName}
+                          </p>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-secondary/50">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Location</p>
+                          <p className="text-sm font-semibold flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5 text-emergency" />{selectedReport.location.address || 'Unknown'}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Lat: {selectedReport.location.lat.toFixed(4)}, Lng: {selectedReport.location.lng.toFixed(4)}
+                          </p>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-secondary/50">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Description</p>
+                          <p className="text-sm leading-relaxed">{selectedReport.description}</p>
+                        </div>
+
+                        {selectedReport.status === 'pending' && (
+                          <div className="flex gap-2 pt-2">
+                            <button onClick={() => { handleReportAction(selectedReport._id, 'approved'); setSelectedReport(null); }}
+                              className="flex-1 py-2.5 rounded-xl bg-success text-success-foreground font-semibold text-sm hover:opacity-90 transition-all active:scale-95">
+                              Approve
+                            </button>
+                            <button onClick={() => { handleReportAction(selectedReport._id, 'investigating'); setSelectedReport(null); }}
+                              className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all active:scale-95">
+                              Investigate
+                            </button>
+                            <button onClick={() => { handleReportAction(selectedReport._id, 'rejected'); setSelectedReport(null); }}
+                              className="flex-1 py-2.5 rounded-xl bg-emergency text-emergency-foreground font-semibold text-sm hover:opacity-90 transition-all active:scale-95">
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </DialogContent>
+              </Dialog>
             </div>
           )}
         </motion.div>
