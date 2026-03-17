@@ -62,7 +62,10 @@ export default function AdminDashboard() {
   };
 
   const handleAlertAction = (id: string, status: SOSAlert['status']) => {
-    setAlerts(prev => prev.map(a => a._id === id ? { ...a, status } : a));
+    api.updateSOSStatus(id, status).then(() => {
+      fetchData();
+      toast.success(`Alert ${status}`);
+    });
     toast.success(`Alert ${status}`);
   };
 
