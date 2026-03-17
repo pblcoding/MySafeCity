@@ -37,6 +37,7 @@ export default function AdminDashboard() {
   const [alerts, setAlerts] = useState<SOSAlert[]>([]);
   const [reports, setReports] = useState<CrimeReport[]>([]);
   const [tab, setTab] = useState<'overview' | 'alerts' | 'reports'>('overview');
+  const [selectedReport, setSelectedReport] = useState<CrimeReport | null>(null);
 
   const fetchData = () => {
     api.getDashboardStats().then(setStats);
