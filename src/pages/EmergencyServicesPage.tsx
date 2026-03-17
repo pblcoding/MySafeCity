@@ -28,7 +28,7 @@ export default function EmergencyServicesPage() {
   // Initialize map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
-    const map = L.map(mapContainerRef.current).setView([19.076, 72.8777], 12);
+    const map = L.map(mapContainerRef.current).setView([30.3165, 78.0322], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);

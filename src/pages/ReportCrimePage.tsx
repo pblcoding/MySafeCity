@@ -47,7 +47,7 @@ export default function ReportCrimePage() {
       setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
       toast.success('Location captured');
     } catch {
-      setLocation({ lat: 19.076, lng: 72.8777 });
+      setLocation({ lat: 30.3165, lng: 78.0322 });
       toast.info('Using default location (Mumbai)');
     } finally {
       setLocating(false);
