@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, AlertTriangle, FileText, TrendingUp, CheckCircle, Clock, XCircle, Eye, Shield, Users, Activity, ArrowUpRight, ArrowDownRight, MapPin, Zap } from 'lucide-react';
+import { LayoutDashboard, AlertTriangle, FileText, TrendingUp, CheckCircle, Clock, XCircle, Eye, Shield, Users, Activity, ArrowUpRight, ArrowDownRight, MapPin, Zap, User, Calendar, Tag } from 'lucide-react';
 import { api } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { SOSAlert, CrimeReport, DashboardStats } from '@/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadialBarChart, RadialBar, Legend } from 'recharts';
 
 const PIE_COLORS = ['hsl(145, 65%, 40%)', 'hsl(38, 92%, 50%)', 'hsl(0, 90%, 50%)'];
