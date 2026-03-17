@@ -16,20 +16,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     api.getNotifications().then(setNotifications);
-    // Simulate real-time: add new notification every 30s
+    // Poll for new notifications every 5s (only from real events stored in api)
     const interval = setInterval(() => {
-      const types: Notification['type'][] = ['sos', 'crime', 'alert'];
-      const randomType = types[Math.floor(Math.random() * types.length)];
-      const newNotif: Notification = {
-        _id: 'n-' + Date.now(),
-        type: randomType,
-        title: randomType === 'sos' ? 'New SOS Alert' : randomType === 'crime' ? 'New Crime Report' : 'Safety Update',
-        message: 'A new alert has been reported in your area.',
-        read: false,
-        createdAt: new Date().toISOString(),
-      };
-      setNotifications(prev => [newNotif, ...prev]);
-    }, 30000);
+      api.getNotifications().then(setNotifications);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
