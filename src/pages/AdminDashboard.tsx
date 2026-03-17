@@ -37,19 +37,28 @@ export default function AdminDashboard() {
   const [reports, setReports] = useState<CrimeReport[]>([]);
   const [tab, setTab] = useState<'overview' | 'alerts' | 'reports'>('overview');
 
+  const fetchData = () => {
+    api.getDashboardStats().then(setStats);
+    api.getSOSAlerts().then(setAlerts);
+    api.getCrimeReports().then(setReports);
+  };
+
   useEffect(() => {
     if (!isAuthenticated || user?.role !== 'admin') {
       navigate('/login');
       return;
     }
-    api.getDashboardStats().then(setStats);
-    api.getSOSAlerts().then(setAlerts);
-    api.getCrimeReports().then(setReports);
+    fetchData();
+    // Poll every 5 seconds so new reports/alerts show up live
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
   }, [isAuthenticated, user, navigate]);
 
   const handleReportAction = (id: string, action: CrimeReport['status']) => {
-    setReports(prev => prev.map(r => r._id === id ? { ...r, status: action } : r));
-    toast.success(`Report ${action}`);
+    api.updateReportStatus(id, action).then(() => {
+      fetchData(); // refresh after status change
+      toast.success(`Report ${action}`);
+    });
   };
 
   const handleAlertAction = (id: string, status: SOSAlert['status']) => {
