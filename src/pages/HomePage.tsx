@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const features = [
   { icon: AlertTriangle, title: 'SOS Emergency', desc: 'One-tap emergency alert with live GPS tracking', link: '/', color: 'text-emergency', bg: 'bg-emergency/10', hoverBg: 'group-hover:bg-emergency/15' },
   { icon: FileText, title: 'Report Crime', desc: 'Submit detailed crime reports with photo evidence', link: '/report', color: 'text-primary', bg: 'bg-primary/10', hoverBg: 'group-hover:bg-primary/15' },
-  { icon: MapPin, title: 'Crime Heatmap', desc: 'Visualize crime hotspots across Mumbai', link: '/heatmap', color: 'text-warning', bg: 'bg-warning/10', hoverBg: 'group-hover:bg-warning/15' },
+  { icon: MapPin, title: 'Crime Heatmap', desc: 'Visualize crime hotspots across Dehradun', link: '/heatmap', color: 'text-warning', bg: 'bg-warning/10', hoverBg: 'group-hover:bg-warning/15' },
   { icon: Phone, title: 'Emergency Services', desc: 'Find nearest police, hospitals & fire stations', link: '/emergency-services', color: 'text-success', bg: 'bg-success/10', hoverBg: 'group-hover:bg-success/15' },
 ];
 
