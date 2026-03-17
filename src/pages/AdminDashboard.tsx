@@ -104,7 +104,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <h1 className="text-3xl font-extrabold tracking-tight">Command Center</h1>
-                <p className="text-sm text-muted-foreground">Real-time city safety monitoring · Mumbai</p>
+                <p className="text-sm text-muted-foreground">Real-time city safety monitoring · Dehradun</p>
               </div>
             </div>
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-success/10 border border-success/20">
