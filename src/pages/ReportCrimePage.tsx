@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, MapPin, Camera, Send, Loader2, CheckCircle } from 'lucide-react';
 import { api } from '@/services/api';
@@ -33,8 +33,13 @@ export default function ReportCrimePage() {
   const [submitted, setSubmitted] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
   if (!isAuthenticated) {
-    navigate('/login');
     return null;
   }
 
@@ -48,7 +53,7 @@ export default function ReportCrimePage() {
       toast.success('Location captured');
     } catch {
       setLocation({ lat: 30.3165, lng: 78.0322 });
-      toast.info('Using default location (Mumbai)');
+      toast.info('Using default location (Dehradun)');
     } finally {
       setLocating(false);
     }
