@@ -33,8 +33,13 @@ export default function ReportCrimePage() {
   const [submitted, setSubmitted] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
   if (!isAuthenticated) {
-    navigate('/login');
     return null;
   }
 
