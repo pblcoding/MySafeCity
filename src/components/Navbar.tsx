@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Shield, Bell, Menu, X, LogOut, User, LayoutDashboard } from 'lucide-react';
+import { Shield, Bell, Menu, X, LogOut, User, Sun, Moon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const { unreadCount } = useNotifications();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -57,6 +59,11 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-2">
+          {/* Theme toggle */}
+          <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105" title="Toggle theme">
+            {theme === 'dark' ? <Sun className="h-5 w-5 text-warning" /> : <Moon className="h-5 w-5 text-muted-foreground" />}
+          </button>
+
           {isAuthenticated ? (
             <>
               <Link to="/notifications" className="relative p-2 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105">
@@ -85,9 +92,14 @@ export default function Navbar() {
         </div>
 
         {/* Mobile toggle */}
-        <button className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex md:hidden items-center gap-1">
+          <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-accent transition-colors">
+            {theme === 'dark' ? <Sun className="h-5 w-5 text-warning" /> : <Moon className="h-5 w-5 text-muted-foreground" />}
+          </button>
+          <button className="p-2 rounded-lg hover:bg-accent transition-colors" onClick={() => setMobileOpen(!mobileOpen)}>
+            {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}

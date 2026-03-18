@@ -73,6 +73,8 @@ export interface HeatmapPoint {
   lng: number;
   intensity: number;
   type: string;
+  areaName?: string;
+  incidentCount?: number;
 }
 
 export interface DashboardStats {
