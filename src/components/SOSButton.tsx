@@ -6,9 +6,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function SOSButton() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [state, setState] = useState<'idle' | 'locating' | 'sending' | 'sent'>('idle');
+
+  // Hide SOS for admin users
+  if (user?.role === 'admin') return null;
 
   const handleSOS = async () => {
     if (!isAuthenticated) {
@@ -25,7 +28,6 @@ export default function SOSButton() {
       setState('sent');
       setTimeout(() => setState('idle'), 3000);
     } catch {
-      // Fallback to default location
       setState('sending');
       await api.triggerSOS({ lat: 30.3165, lng: 78.0322 });
       setState('sent');

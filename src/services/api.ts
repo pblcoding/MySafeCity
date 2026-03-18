@@ -8,10 +8,6 @@ const users: User[] = [
 
 const CENTER = { lat: 30.3165, lng: 78.0322 };
 
-// ── Shared mutable stores ──────────────────────────────────
-// These arrays are mutated in-place so every part of the app
-// (citizen pages AND admin dashboard) sees the same data.
-
 const sosAlerts: SOSAlert[] = [
   { _id: 's1', userId: '1', userName: 'Rahul Sharma', location: { lat: 30.3165, lng: 78.0322, address: 'Clock Tower, Dehradun' }, status: 'active', createdAt: new Date(Date.now() - 120000).toISOString() },
   { _id: 's2', userId: '3', userName: 'Priya Patel', location: { lat: 30.3255, lng: 78.0438, address: 'Rajpur Road, Dehradun' }, status: 'responding', createdAt: new Date(Date.now() - 600000).toISOString() },
@@ -35,18 +31,24 @@ const notifications: Notification[] = [
 ];
 
 const heatmapPoints: HeatmapPoint[] = [
-  { lat: 30.3165, lng: 78.0322, intensity: 0.9, type: 'theft' },
-  { lat: 30.3255, lng: 78.0438, intensity: 0.7, type: 'assault' },
-  { lat: 30.3220, lng: 78.0390, intensity: 0.5, type: 'vandalism' },
-  { lat: 30.3800, lng: 78.1200, intensity: 0.3, type: 'assault' },
-  { lat: 30.3350, lng: 78.0500, intensity: 0.8, type: 'fraud' },
-  { lat: 30.3183, lng: 78.0250, intensity: 0.9, type: 'robbery' },
-  { lat: 30.3400, lng: 78.0650, intensity: 0.6, type: 'harassment' },
-  { lat: 30.3100, lng: 78.0280, intensity: 0.7, type: 'theft' },
-  { lat: 30.3500, lng: 78.0100, intensity: 0.5, type: 'vandalism' },
-  { lat: 30.3300, lng: 78.0400, intensity: 0.8, type: 'robbery' },
-  { lat: 30.2900, lng: 78.0200, intensity: 0.4, type: 'theft' },
-  { lat: 30.3600, lng: 78.0800, intensity: 0.6, type: 'assault' },
+  { lat: 30.3165, lng: 78.0322, intensity: 0.9, type: 'theft', areaName: 'Clock Tower', incidentCount: 14 },
+  { lat: 30.3255, lng: 78.0438, intensity: 0.7, type: 'assault', areaName: 'Rajpur Road', incidentCount: 9 },
+  { lat: 30.3220, lng: 78.0390, intensity: 0.5, type: 'vandalism', areaName: 'Paltan Bazaar', incidentCount: 6 },
+  { lat: 30.3800, lng: 78.1200, intensity: 0.3, type: 'assault', areaName: 'Sahastradhara Road', incidentCount: 3 },
+  { lat: 30.3350, lng: 78.0500, intensity: 0.8, type: 'fraud', areaName: 'Ballupur Chowk', incidentCount: 11 },
+  { lat: 30.3183, lng: 78.0250, intensity: 0.9, type: 'robbery', areaName: 'Railway Station', incidentCount: 15 },
+  { lat: 30.3400, lng: 78.0650, intensity: 0.6, type: 'harassment', areaName: 'Mussoorie Diversion Road', incidentCount: 7 },
+  { lat: 30.3100, lng: 78.0280, intensity: 0.7, type: 'theft', areaName: 'Race Course', incidentCount: 10 },
+  { lat: 30.3500, lng: 78.0100, intensity: 0.5, type: 'vandalism', areaName: 'Prem Nagar', incidentCount: 5 },
+  { lat: 30.3300, lng: 78.0400, intensity: 0.8, type: 'robbery', areaName: 'Connaught Place', incidentCount: 12 },
+  { lat: 30.2900, lng: 78.0200, intensity: 0.4, type: 'theft', areaName: 'Clement Town', incidentCount: 4 },
+  { lat: 30.3600, lng: 78.0800, intensity: 0.6, type: 'assault', areaName: 'Rispana Bridge', incidentCount: 8 },
+  { lat: 30.2800, lng: 78.0450, intensity: 0.5, type: 'theft', areaName: 'Doiwala', incidentCount: 5 },
+  { lat: 30.3050, lng: 78.0150, intensity: 0.4, type: 'harassment', areaName: 'Selaqui', incidentCount: 4 },
+  { lat: 30.3450, lng: 78.0300, intensity: 0.7, type: 'robbery', areaName: 'Dalanwala', incidentCount: 9 },
+  { lat: 30.3700, lng: 78.0500, intensity: 0.3, type: 'vandalism', areaName: 'Raipur', incidentCount: 3 },
+  { lat: 30.3550, lng: 78.0250, intensity: 0.6, type: 'fraud', areaName: 'Dharampur', incidentCount: 7 },
+  { lat: 30.3200, lng: 78.0550, intensity: 0.8, type: 'assault', areaName: 'Karanpur', incidentCount: 11 },
 ];
 
 const mockEmergencyServices: EmergencyService[] = [
@@ -58,14 +60,12 @@ const mockEmergencyServices: EmergencyService[] = [
   { _id: 'e6', name: 'Prem Nagar Fire Station', type: 'fire', location: { lat: 30.3500, lng: 78.0100 }, address: 'Prem Nagar, Dehradun', phone: '0135-2770101', distance: 3.5 },
 ];
 
-// ── Helper: compute live dashboard stats from the shared stores ──
 function computeDashboardStats(): DashboardStats {
   const totalReports = crimeReports.length;
   const activeAlerts = sosAlerts.filter(a => a.status === 'active').length;
   const resolvedCases = crimeReports.filter(r => r.status === 'approved').length + sosAlerts.filter(a => a.status === 'resolved').length;
   const pendingReports = crimeReports.filter(r => r.status === 'pending').length;
 
-  // Count by type
   const typeCounts: Record<string, number> = {};
   crimeReports.forEach(r => {
     const label = r.type.charAt(0).toUpperCase() + r.type.slice(1);
@@ -73,7 +73,6 @@ function computeDashboardStats(): DashboardStats {
   });
   const reportsByType = Object.entries(typeCounts).map(([type, count]) => ({ type, count }));
 
-  // Count by month
   const monthCounts: Record<string, number> = {};
   crimeReports.forEach(r => {
     const d = new Date(r.createdAt);
@@ -82,7 +81,6 @@ function computeDashboardStats(): DashboardStats {
   });
   const reportsByMonth = Object.entries(monthCounts).map(([month, count]) => ({ month, count }));
 
-  // Severity
   const sevCounts: Record<string, number> = { Low: 0, Medium: 0, High: 0 };
   crimeReports.forEach(r => {
     const label = r.severity ? r.severity.charAt(0).toUpperCase() + r.severity.slice(1) : 'Medium';
@@ -93,9 +91,7 @@ function computeDashboardStats(): DashboardStats {
   return { totalReports, activeAlerts, resolvedCases, pendingReports, reportsByType, reportsByMonth, severityDistribution };
 }
 
-// Simulated API service
 export const api = {
-  // Auth
   login: async (email: string, _password: string): Promise<{ user: User; token: string }> => {
     await delay(500);
     const user = users.find(u => u.email === email);
@@ -116,7 +112,6 @@ export const api = {
     return { user: newUser, token: 'mock-jwt-token-' + newUser._id };
   },
 
-  // SOS
   triggerSOS: async (location: { lat: number; lng: number }): Promise<SOSAlert> => {
     await delay(300);
     const alert: SOSAlert = {
@@ -127,8 +122,7 @@ export const api = {
       status: 'active',
       createdAt: new Date().toISOString(),
     };
-    sosAlerts.unshift(alert); // ← persist to shared store
-    // Also add a notification
+    sosAlerts.unshift(alert);
     notifications.unshift({
       _id: 'n-' + Date.now(),
       type: 'sos',
@@ -142,7 +136,7 @@ export const api = {
 
   getSOSAlerts: async (): Promise<SOSAlert[]> => {
     await delay(300);
-    return [...sosAlerts]; // return copy of live array
+    return [...sosAlerts];
   },
 
   updateSOSStatus: async (id: string, status: SOSAlert['status']): Promise<SOSAlert> => {
@@ -153,10 +147,9 @@ export const api = {
     return sosAlerts[idx];
   },
 
-  // Crime Reports
   getCrimeReports: async (): Promise<CrimeReport[]> => {
     await delay(300);
-    return [...crimeReports]; // return copy of live array
+    return [...crimeReports];
   },
 
   submitCrimeReport: async (data: Partial<CrimeReport>): Promise<CrimeReport> => {
@@ -173,15 +166,15 @@ export const api = {
       severity: data.severity || 'medium',
       createdAt: new Date().toISOString(),
     };
-    crimeReports.unshift(report); // ← persist to shared store
-    // Add heatmap point
+    crimeReports.unshift(report);
     heatmapPoints.push({
       lat: report.location.lat ?? CENTER.lat,
       lng: report.location.lng ?? CENTER.lng,
       intensity: report.severity === 'high' ? 0.9 : report.severity === 'medium' ? 0.6 : 0.3,
       type: report.type,
+      areaName: report.location.address || 'Unknown Area',
+      incidentCount: 1,
     });
-    // Add notification
     notifications.unshift({
       _id: 'n-' + Date.now(),
       type: 'crime',
@@ -201,25 +194,34 @@ export const api = {
     return crimeReports[idx];
   },
 
-  // Heatmap
   getHeatmapData: async (): Promise<HeatmapPoint[]> => {
     await delay(200);
     return [...heatmapPoints];
   },
 
-  // Emergency Services
   getEmergencyServices: async (): Promise<EmergencyService[]> => {
     await delay(300);
-    return mockEmergencyServices;
+    return [...mockEmergencyServices];
   },
 
-  // Notifications
+  addEmergencyService: async (data: Omit<EmergencyService, '_id'>): Promise<EmergencyService> => {
+    await delay(300);
+    const service: EmergencyService = { ...data, _id: 'es-' + Date.now() };
+    mockEmergencyServices.push(service);
+    return service;
+  },
+
+  deleteEmergencyService: async (id: string): Promise<void> => {
+    await delay(300);
+    const idx = mockEmergencyServices.findIndex(s => s._id === id);
+    if (idx !== -1) mockEmergencyServices.splice(idx, 1);
+  },
+
   getNotifications: async (): Promise<Notification[]> => {
     await delay(200);
     return [...notifications];
   },
 
-  // Dashboard — now computed live from shared stores
   getDashboardStats: async (): Promise<DashboardStats> => {
     await delay(300);
     return computeDashboardStats();
