@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, AlertTriangle, FileText, TrendingUp, CheckCircle, Clock, XCircle, Eye, Shield, Users, Activity, ArrowUpRight, ArrowDownRight, MapPin, Zap, User, Calendar, Tag } from 'lucide-react';
+import { LayoutDashboard, AlertTriangle, FileText, TrendingUp, CheckCircle, Clock, XCircle, Eye, Shield, Activity, ArrowUpRight, ArrowDownRight, MapPin, Zap, User, Calendar, Tag, Plus, Trash2, Building2, Phone } from 'lucide-react';
 import { api } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import type { SOSAlert, CrimeReport, DashboardStats } from '@/types';
+import type { SOSAlert, CrimeReport, DashboardStats, EmergencyService } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadialBarChart, RadialBar, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 
 const PIE_COLORS = ['hsl(145, 65%, 40%)', 'hsl(38, 92%, 50%)', 'hsl(0, 90%, 50%)'];
 const CHART_BLUE = 'hsl(220, 70%, 55%)';
-const CHART_TEAL = 'hsl(170, 60%, 45%)';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -30,19 +29,27 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
+const SERVICE_TYPES = ['police', 'hospital', 'fire'] as const;
+const SERVICE_ICONS: Record<string, string> = { police: '🚔', hospital: '🏥', fire: '🚒' };
+
 export default function AdminDashboard() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [alerts, setAlerts] = useState<SOSAlert[]>([]);
   const [reports, setReports] = useState<CrimeReport[]>([]);
-  const [tab, setTab] = useState<'overview' | 'alerts' | 'reports'>('overview');
+  const [services, setServices] = useState<EmergencyService[]>([]);
+  const [tab, setTab] = useState<'overview' | 'alerts' | 'reports' | 'services'>('overview');
   const [selectedReport, setSelectedReport] = useState<CrimeReport | null>(null);
+
+  // Service form state
+  const [newService, setNewService] = useState({ name: '', type: 'police' as EmergencyService['type'], address: '', phone: '', lat: '', lng: '' });
 
   const fetchData = () => {
     api.getDashboardStats().then(setStats);
     api.getSOSAlerts().then(setAlerts);
     api.getCrimeReports().then(setReports);
+    api.getEmergencyServices().then(setServices);
   };
 
   useEffect(() => {
@@ -51,14 +58,13 @@ export default function AdminDashboard() {
       return;
     }
     fetchData();
-    // Poll every 5 seconds so new reports/alerts show up live
     const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, [isAuthenticated, user, navigate]);
 
   const handleReportAction = (id: string, action: CrimeReport['status']) => {
     api.updateReportStatus(id, action).then(() => {
-      fetchData(); // refresh after status change
+      fetchData();
       toast.success(`Report ${action}`);
     });
   };
@@ -68,15 +74,36 @@ export default function AdminDashboard() {
       fetchData();
       toast.success(`Alert ${status}`);
     });
-    toast.success(`Alert ${status}`);
+  };
+
+  const handleAddService = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newService.name || !newService.address || !newService.phone) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+    await api.addEmergencyService({
+      name: newService.name,
+      type: newService.type,
+      address: newService.address,
+      phone: newService.phone,
+      location: { lat: parseFloat(newService.lat) || 30.3165, lng: parseFloat(newService.lng) || 78.0322 },
+    });
+    setNewService({ name: '', type: 'police', address: '', phone: '', lat: '', lng: '' });
+    fetchData();
+    toast.success('Emergency service added');
+  };
+
+  const handleDeleteService = async (id: string) => {
+    await api.deleteEmergencyService(id);
+    fetchData();
+    toast.success('Service removed');
   };
 
   if (!stats) return (
     <div className="min-h-screen pt-[var(--nav-height)] flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
-        <div className="relative">
-          <div className="h-12 w-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-        </div>
+        <div className="h-12 w-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
         <p className="text-sm text-muted-foreground animate-pulse">Loading dashboard...</p>
       </div>
     </div>
@@ -89,8 +116,7 @@ export default function AdminDashboard() {
     { label: 'Pending Review', value: stats.pendingReports, icon: Clock, color: 'text-warning', bgGrad: 'from-warning/10 to-warning/5', trend: '-5%', up: false },
   ];
 
-  const resolutionRate = Math.round((stats.resolvedCases / stats.totalReports) * 100);
-  const radialData = [{ name: 'Resolution', value: resolutionRate, fill: CHART_BLUE }];
+  const resolutionRate = stats.totalReports > 0 ? Math.round((stats.resolvedCases / stats.totalReports) * 100) : 0;
 
   return (
     <div className="min-h-screen pt-[var(--nav-height)] py-10 px-4">
@@ -139,7 +165,7 @@ export default function AdminDashboard() {
 
           {/* Tabs */}
           <div className="flex gap-1 mb-6 bg-secondary/60 backdrop-blur-sm rounded-xl p-1 w-fit border border-border/30">
-            {(['overview', 'alerts', 'reports'] as const).map(t => (
+            {(['overview', 'alerts', 'reports', 'services'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
                 className={`relative px-5 py-2 rounded-lg text-sm font-medium capitalize transition-all duration-200 ${
                   tab === t 
@@ -166,9 +192,7 @@ export default function AdminDashboard() {
                     <h3 className="font-bold text-base">Reports by Type</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">Crime category breakdown</p>
                   </div>
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Activity className="h-4 w-4 text-primary" />
-                  </div>
+                  <div className="p-2 rounded-lg bg-primary/10"><Activity className="h-4 w-4 text-primary" /></div>
                 </div>
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={stats.reportsByType} barCategoryGap="20%">
@@ -187,7 +211,7 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               </motion.div>
 
-              {/* Pie + Resolution */}
+              {/* Pie */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
                 className="glass-card-hover rounded-2xl p-6 flex flex-col">
                 <div className="flex items-center justify-between mb-4">
@@ -195,14 +219,12 @@ export default function AdminDashboard() {
                     <h3 className="font-bold text-base">Severity</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">Distribution breakdown</p>
                   </div>
-                  <div className="p-2 rounded-lg bg-emergency/10">
-                    <Zap className="h-4 w-4 text-emergency" />
-                  </div>
+                  <div className="p-2 rounded-lg bg-emergency/10"><Zap className="h-4 w-4 text-emergency" /></div>
                 </div>
                 <div className="flex-1 flex items-center justify-center">
                   <ResponsiveContainer width="100%" height={200}>
                     <PieChart>
-                      <Pie data={stats.severityDistribution} dataKey="count" nameKey="severity" cx="50%" cy="50%" 
+                      <Pie data={stats.severityDistribution} dataKey="count" nameKey="severity" cx="50%" cy="50%"
                         innerRadius={55} outerRadius={85} paddingAngle={4} strokeWidth={0}>
                         {stats.severityDistribution.map((_, i) => (
                           <Cell key={i} fill={PIE_COLORS[i]} />
@@ -223,7 +245,7 @@ export default function AdminDashboard() {
                 </div>
               </motion.div>
 
-              {/* Area Chart - Trend */}
+              {/* Area Chart */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="glass-card-hover rounded-2xl p-6 lg:col-span-2">
                 <div className="flex items-center justify-between mb-6">
@@ -231,9 +253,7 @@ export default function AdminDashboard() {
                     <h3 className="font-bold text-base">Monthly Trend</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">Report volume over time</p>
                   </div>
-                  <div className="p-2 rounded-lg bg-success/10">
-                    <TrendingUp className="h-4 w-4 text-success" />
-                  </div>
+                  <div className="p-2 rounded-lg bg-success/10"><TrendingUp className="h-4 w-4 text-success" /></div>
                 </div>
                 <ResponsiveContainer width="100%" height={240}>
                   <AreaChart data={stats.reportsByMonth}>
@@ -252,7 +272,7 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               </motion.div>
 
-              {/* Resolution Rate + Quick Stats */}
+              {/* Resolution Rate */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
                 className="glass-card-hover rounded-2xl p-6 flex flex-col">
                 <div className="flex items-center justify-between mb-4">
@@ -260,9 +280,7 @@ export default function AdminDashboard() {
                     <h3 className="font-bold text-base">Resolution Rate</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">Case closure performance</p>
                   </div>
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Shield className="h-4 w-4 text-primary" />
-                  </div>
+                  <div className="p-2 rounded-lg bg-primary/10"><Shield className="h-4 w-4 text-primary" /></div>
                 </div>
                 <div className="flex-1 flex items-center justify-center">
                   <div className="relative">
@@ -298,9 +316,7 @@ export default function AdminDashboard() {
                     <h3 className="font-bold text-base">Recent Activity</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">Latest reports and alerts</p>
                   </div>
-                  <div className="p-2 rounded-lg bg-warning/10">
-                    <Eye className="h-4 w-4 text-warning" />
-                  </div>
+                  <div className="p-2 rounded-lg bg-warning/10"><Eye className="h-4 w-4 text-warning" /></div>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {reports.slice(0, 3).map((r, i) => (
@@ -448,14 +464,12 @@ export default function AdminDashboard() {
                             </p>
                           </div>
                         </div>
-
                         <div className="p-3 rounded-xl bg-secondary/50">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Reported By</p>
                           <p className="text-sm font-semibold flex items-center gap-1.5">
                             <User className="h-3.5 w-3.5 text-primary" />{selectedReport.userName}
                           </p>
                         </div>
-
                         <div className="p-3 rounded-xl bg-secondary/50">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Location</p>
                           <p className="text-sm font-semibold flex items-center gap-1.5">
@@ -465,12 +479,10 @@ export default function AdminDashboard() {
                             Lat: {selectedReport.location.lat.toFixed(4)}, Lng: {selectedReport.location.lng.toFixed(4)}
                           </p>
                         </div>
-
                         <div className="p-3 rounded-xl bg-secondary/50">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Description</p>
                           <p className="text-sm leading-relaxed">{selectedReport.description}</p>
                         </div>
-
                         {selectedReport.status === 'pending' && (
                           <div className="flex gap-2 pt-2">
                             <button onClick={() => { handleReportAction(selectedReport._id, 'approved'); setSelectedReport(null); }}
@@ -492,6 +504,87 @@ export default function AdminDashboard() {
                   )}
                 </DialogContent>
               </Dialog>
+            </div>
+          )}
+
+          {tab === 'services' && (
+            <div className="space-y-6">
+              {/* Add Service Form */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                className="glass-card rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Plus className="h-5 w-5 text-primary" />
+                  <h3 className="font-bold text-base">Add Emergency Service</h3>
+                </div>
+                <form onSubmit={handleAddService} className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">Name *</label>
+                    <input value={newService.name} onChange={e => setNewService(p => ({ ...p, name: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      placeholder="e.g. Central Police Station" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">Type *</label>
+                    <select value={newService.type} onChange={e => setNewService(p => ({ ...p, type: e.target.value as EmergencyService['type'] }))}
+                      className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                      {SERVICE_TYPES.map(t => <option key={t} value={t} className="capitalize">{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">Address *</label>
+                    <input value={newService.address} onChange={e => setNewService(p => ({ ...p, address: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      placeholder="Full address" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">Phone *</label>
+                    <input value={newService.phone} onChange={e => setNewService(p => ({ ...p, phone: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      placeholder="0135-XXXXXXX" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">Latitude</label>
+                      <input value={newService.lat} onChange={e => setNewService(p => ({ ...p, lat: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="30.3165" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">Longitude</label>
+                      <input value={newService.lng} onChange={e => setNewService(p => ({ ...p, lng: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="78.0322" />
+                    </div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <button type="submit" className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-primary/20">
+                      Add Service
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+
+              {/* Services List */}
+              <div className="space-y-3">
+                {services.map((s, i) => (
+                  <motion.div key={s._id} custom={i} variants={fadeUp} initial="hidden" animate="visible"
+                    className="glass-card-hover rounded-xl p-4 flex items-center gap-4 group">
+                    <div className="text-2xl">{SERVICE_ICONS[s.type] || '📍'}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm">{s.name}</p>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" />{s.address}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="h-3 w-3" />{s.phone}</span>
+                      </div>
+                    </div>
+                    <span className="px-3 py-1.5 rounded-lg text-xs font-semibold capitalize bg-primary/10 text-primary border border-primary/20">{s.type}</span>
+                    <button onClick={() => handleDeleteService(s._id)}
+                      className="p-2 rounded-lg hover:bg-emergency/10 transition-all text-muted-foreground hover:text-emergency active:scale-90">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           )}
         </motion.div>
