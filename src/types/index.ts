@@ -18,6 +18,8 @@ export interface SOSAlert {
   _id: string;
   userId: string;
   userName: string;
+  userPhone?: string;
+  userEmail?: string;
   location: {
     lat: number;
     lng: number;
