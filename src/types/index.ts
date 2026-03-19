@@ -18,6 +18,8 @@ export interface SOSAlert {
   _id: string;
   userId: string;
   userName: string;
+  userPhone?: string;
+  userEmail?: string;
   location: {
     lat: number;
     lng: number;
@@ -40,10 +42,17 @@ export interface CrimeReport {
     lng: number;
     address?: string;
   };
+  crimeLocation?: {
+    lat: number;
+    lng: number;
+    address?: string;
+  };
   media?: string[];
+  mediaNames?: string[];
   status: 'pending' | 'approved' | 'rejected' | 'investigating';
   severity: 'low' | 'medium' | 'high';
   createdAt: string;
+  statusUpdates?: { status: string; timestamp: string; note?: string }[];
 }
 
 export interface EmergencyService {

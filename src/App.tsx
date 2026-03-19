@@ -12,6 +12,7 @@ import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ReportCrimePage from "@/pages/ReportCrimePage";
+import MyReportsPage from "@/pages/MyReportsPage";
 import HeatmapPage from "@/pages/HeatmapPage";
 import EmergencyServicesPage from "@/pages/EmergencyServicesPage";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/report" element={<ReportCrimePage />} />
+                <Route path="/my-reports" element={<MyReportsPage />} />
                 <Route path="/heatmap" element={<HeatmapPage />} />
                 <Route path="/emergency-services" element={<EmergencyServicesPage />} />
                 <Route path="/admin" element={<AdminDashboard />} />
