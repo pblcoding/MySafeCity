@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, MapPin, Camera, Send, Loader2, CheckCircle } from 'lucide-react';
-import { api } from '@/services/api';
+import { FileText, MapPin, Camera, Send, Loader2, CheckCircle, Navigation } from 'lucide-react';
+import { api, reverseGeocode } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -24,24 +24,23 @@ const severities: { value: CrimeReport['severity']; label: string; color: string
 ];
 
 export default function ReportCrimePage() {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ title: '', description: '', type: 'theft' as CrimeReport['type'], severity: 'medium' as CrimeReport['severity'] });
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number; address?: string } | null>(null);
+  const [crimeLocation, setCrimeLocation] = useState<{ lat: number; lng: number; address?: string } | null>(null);
+  const [crimeLocationInput, setCrimeLocationInput] = useState({ lat: '', lng: '' });
   const [locating, setLocating] = useState(false);
+  const [resolvingCrimeLoc, setResolvingCrimeLoc] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
+    if (!isAuthenticated) navigate('/login');
   }, [isAuthenticated, navigate]);
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   const getLocation = async () => {
     setLocating(true);
@@ -49,25 +48,54 @@ export default function ReportCrimePage() {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
         navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 })
       );
-      setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      const { latitude: lat, longitude: lng } = pos.coords;
+      const address = await reverseGeocode(lat, lng);
+      setLocation({ lat, lng, address });
       toast.success('Location captured');
     } catch {
-      setLocation({ lat: 30.3165, lng: 78.0322 });
+      const address = await reverseGeocode(30.3165, 78.0322);
+      setLocation({ lat: 30.3165, lng: 78.0322, address });
       toast.info('Using default location (Dehradun)');
     } finally {
       setLocating(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!location) {
-      toast.error('Please capture your location first');
+  const resolveCrimeLocation = async () => {
+    const lat = parseFloat(crimeLocationInput.lat);
+    const lng = parseFloat(crimeLocationInput.lng);
+    if (isNaN(lat) || isNaN(lng)) {
+      toast.error('Enter valid latitude and longitude');
       return;
     }
+    setResolvingCrimeLoc(true);
+    const address = await reverseGeocode(lat, lng);
+    setCrimeLocation({ lat, lng, address });
+    setResolvingCrimeLoc(false);
+    toast.success('Crime location resolved');
+  };
+
+  const useSameAsMyLocation = () => {
+    if (location) {
+      setCrimeLocation({ ...location });
+      setCrimeLocationInput({ lat: String(location.lat), lng: String(location.lng) });
+      toast.success('Using your current location as crime location');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!location) { toast.error('Please capture your location first'); return; }
     setSubmitting(true);
     try {
-      await api.submitCrimeReport({ ...form, location });
+      await api.submitCrimeReport({
+        ...form,
+        userId: user?._id,
+        userName: user?.name,
+        location,
+        crimeLocation: crimeLocation || undefined,
+        mediaNames: files.map(f => f.name),
+      });
       setSubmitted(true);
       toast.success('Report submitted successfully!');
     } catch {
@@ -84,10 +112,16 @@ export default function ReportCrimePage() {
           <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-2">Report Submitted</h2>
           <p className="text-muted-foreground mb-6">Your crime report has been submitted and will be reviewed by our team.</p>
-          <button onClick={() => { setSubmitted(false); setForm({ title: '', description: '', type: 'theft', severity: 'medium' }); setLocation(null); setFiles([]); }}
-            className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90">
-            Submit Another Report
-          </button>
+          <div className="flex gap-3 justify-center">
+            <button onClick={() => navigate('/my-reports')}
+              className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90">
+              View My Reports
+            </button>
+            <button onClick={() => { setSubmitted(false); setForm({ title: '', description: '', type: 'theft', severity: 'medium' }); setLocation(null); setCrimeLocation(null); setCrimeLocationInput({ lat: '', lng: '' }); setFiles([]); }}
+              className="px-6 py-2.5 border border-border rounded-lg font-medium hover:bg-accent">
+              Submit Another
+            </button>
+          </div>
         </motion.div>
       </div>
     );
@@ -148,20 +182,61 @@ export default function ReportCrimePage() {
               </div>
             </div>
 
-            {/* Location */}
+            {/* My Location (where submitting from) */}
             <div className="glass-card rounded-xl p-6">
-              <label className="text-sm font-semibold mb-3 block">Location</label>
+              <label className="text-sm font-semibold mb-3 block">Your Current Location</label>
               {location ? (
-                <div className="flex items-center gap-2 text-sm text-success">
-                  <MapPin className="h-4 w-4" />
-                  <span>Location captured: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}</span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-sm text-success">
+                    <MapPin className="h-4 w-4" />
+                    <span className="font-medium">{location.address}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground ml-6">Lat: {location.lat.toFixed(4)}, Lng: {location.lng.toFixed(4)}</p>
                 </div>
               ) : (
                 <button type="button" onClick={getLocation} disabled={locating}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border hover:bg-accent transition-colors text-sm">
-                  {locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+                  {locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Navigation className="h-4 w-4" />}
                   {locating ? 'Getting location...' : 'Capture My Location'}
                 </button>
+              )}
+            </div>
+
+            {/* Crime Location (where crime happened) */}
+            <div className="glass-card rounded-xl p-6">
+              <label className="text-sm font-semibold mb-3 block">Crime Location <span className="text-xs text-muted-foreground font-normal">(where the crime happened)</span></label>
+              
+              {crimeLocation ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-destructive">
+                    <MapPin className="h-4 w-4" />
+                    <span className="font-medium">{crimeLocation.address}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground ml-6">Lat: {crimeLocation.lat.toFixed(4)}, Lng: {crimeLocation.lng.toFixed(4)}</p>
+                  <button type="button" onClick={() => { setCrimeLocation(null); setCrimeLocationInput({ lat: '', lng: '' }); }}
+                    className="text-xs text-muted-foreground underline ml-6">Change</button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {location && (
+                    <button type="button" onClick={useSameAsMyLocation}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-accent transition-colors text-xs text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5" /> Same as my current location
+                    </button>
+                  )}
+                  <div className="flex gap-2">
+                    <input type="text" value={crimeLocationInput.lat} onChange={e => setCrimeLocationInput(p => ({ ...p, lat: e.target.value }))}
+                      className="flex-1 px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-primary/30 outline-none"
+                      placeholder="Latitude (e.g. 30.3165)" />
+                    <input type="text" value={crimeLocationInput.lng} onChange={e => setCrimeLocationInput(p => ({ ...p, lng: e.target.value }))}
+                      className="flex-1 px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-primary/30 outline-none"
+                      placeholder="Longitude (e.g. 78.0322)" />
+                    <button type="button" onClick={resolveCrimeLocation} disabled={resolvingCrimeLoc}
+                      className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                      {resolvingCrimeLoc ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Resolve'}
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
 
@@ -174,7 +249,13 @@ export default function ReportCrimePage() {
                 <input type="file" multiple accept="image/*,video/*" className="hidden" onChange={e => setFiles(Array.from(e.target.files || []))} />
               </label>
               {files.length > 0 && (
-                <p className="text-xs text-muted-foreground mt-2">{files.length} file(s) selected</p>
+                <div className="mt-2 space-y-1">
+                  {files.map((f, i) => (
+                    <p key={i} className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Camera className="h-3 w-3" />{f.name}
+                    </p>
+                  ))}
+                </div>
               )}
             </div>
 
