@@ -21,6 +21,10 @@ export default function Navbar() {
     { path: '/emergency-services', label: 'Emergency' },
   ];
 
+  if (isAuthenticated && user?.role !== 'admin') {
+    navItems.push({ path: '/my-reports', label: 'My Reports' });
+  }
+
   if (user?.role === 'admin') {
     navItems.push({ path: '/admin', label: 'Dashboard' });
   }
