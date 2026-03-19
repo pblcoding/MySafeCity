@@ -4,23 +4,28 @@ import { User, SOSAlert, CrimeReport, EmergencyService, Notification, DashboardS
 const users: User[] = [
   { _id: '1', name: 'Rahul Sharma', email: 'rahul@example.com', role: 'citizen', phone: '+91-9412345678', createdAt: '2024-01-15' },
   { _id: '2', name: 'Admin User', email: 'admin@mysafecity.com', role: 'admin', phone: '+91-9410000001', createdAt: '2024-01-01' },
+  { _id: '3', name: 'Priya Patel', email: 'priya@example.com', role: 'citizen', phone: '+91-9412345679', createdAt: '2024-02-10' },
+  { _id: '4', name: 'Amit Kumar', email: 'amit@example.com', role: 'citizen', phone: '+91-9412345680', createdAt: '2024-03-05' },
+  { _id: '5', name: 'Sneha Reddy', email: 'sneha@example.com', role: 'citizen', phone: '+91-9412345681', createdAt: '2024-04-20' },
+  { _id: '6', name: 'Deepak Verma', email: 'deepak@example.com', role: 'citizen', phone: '+91-9412345682', createdAt: '2024-05-12' },
+  { _id: '7', name: 'Anjali Desai', email: 'anjali@example.com', role: 'citizen', phone: '+91-9412345683', createdAt: '2024-06-18' },
 ];
 
 const CENTER = { lat: 30.3165, lng: 78.0322 };
 
 const sosAlerts: SOSAlert[] = [
-  { _id: 's1', userId: '1', userName: 'Rahul Sharma', location: { lat: 30.3165, lng: 78.0322, address: 'Clock Tower, Dehradun' }, status: 'active', createdAt: new Date(Date.now() - 120000).toISOString() },
-  { _id: 's2', userId: '3', userName: 'Priya Patel', location: { lat: 30.3255, lng: 78.0438, address: 'Rajpur Road, Dehradun' }, status: 'responding', createdAt: new Date(Date.now() - 600000).toISOString() },
-  { _id: 's3', userId: '4', userName: 'Amit Kumar', location: { lat: 30.3398, lng: 78.0644, address: 'ISBT Dehradun' }, status: 'resolved', createdAt: new Date(Date.now() - 3600000).toISOString(), resolvedAt: new Date(Date.now() - 1800000).toISOString() },
+  { _id: 's1', userId: '1', userName: 'Rahul Sharma', userPhone: '+91-9412345678', userEmail: 'rahul@example.com', location: { lat: 30.3165, lng: 78.0322, address: 'Clock Tower, Dehradun' }, status: 'active', createdAt: new Date(Date.now() - 120000).toISOString() },
+  { _id: 's2', userId: '3', userName: 'Priya Patel', userPhone: '+91-9412345679', userEmail: 'priya@example.com', location: { lat: 30.3255, lng: 78.0438, address: 'Rajpur Road, Dehradun' }, status: 'responding', createdAt: new Date(Date.now() - 600000).toISOString() },
+  { _id: 's3', userId: '4', userName: 'Amit Kumar', userPhone: '+91-9412345680', userEmail: 'amit@example.com', location: { lat: 30.3398, lng: 78.0644, address: 'ISBT Dehradun' }, status: 'resolved', createdAt: new Date(Date.now() - 3600000).toISOString(), resolvedAt: new Date(Date.now() - 1800000).toISOString() },
 ];
 
 const crimeReports: CrimeReport[] = [
-  { _id: 'c1', userId: '1', userName: 'Rahul Sharma', type: 'theft', title: 'Mobile snatched near Clock Tower', description: 'Someone snatched my phone while walking near Clock Tower market area.', location: { lat: 30.3165, lng: 78.0322, address: 'Clock Tower, Dehradun' }, status: 'approved', severity: 'medium', createdAt: '2024-12-10T14:30:00Z' },
-  { _id: 'c2', userId: '3', userName: 'Priya Patel', type: 'vandalism', title: 'Car window smashed at Paltan Bazaar', description: 'Parked car had window smashed overnight in Paltan Bazaar parking.', location: { lat: 30.3220, lng: 78.0390, address: 'Paltan Bazaar, Dehradun' }, status: 'pending', severity: 'low', createdAt: '2024-12-12T08:00:00Z' },
-  { _id: 'c3', userId: '4', userName: 'Amit Kumar', type: 'assault', title: 'Mugging near Sahastradhara Road', description: 'Was threatened at knifepoint near Sahastradhara Road entrance.', location: { lat: 30.3800, lng: 78.1200, address: 'Sahastradhara Road, Dehradun' }, status: 'investigating', severity: 'high', createdAt: '2024-12-14T22:15:00Z' },
-  { _id: 'c4', userId: '5', userName: 'Sneha Reddy', type: 'robbery', title: 'Shop robbery at Rajpur Road', description: 'Armed robbery at jewellery shop on Rajpur Road.', location: { lat: 30.3255, lng: 78.0438, address: 'Rajpur Road, Dehradun' }, status: 'approved', severity: 'high', createdAt: '2024-12-15T03:45:00Z' },
-  { _id: 'c5', userId: '6', userName: 'Deepak Verma', type: 'fraud', title: 'ATM skimming device found at Ballupur', description: 'Found a skimming device on ATM machine near Ballupur Chowk.', location: { lat: 30.3350, lng: 78.0500, address: 'Ballupur Chowk, Dehradun' }, status: 'approved', severity: 'medium', createdAt: '2024-12-16T11:20:00Z' },
-  { _id: 'c6', userId: '7', userName: 'Anjali Desai', type: 'harassment', title: 'Street harassment near Dehradun Railway Station', description: 'Verbal harassment near the railway station exit.', location: { lat: 30.3183, lng: 78.0250, address: 'Dehradun Railway Station' }, status: 'pending', severity: 'medium', createdAt: '2024-12-17T19:30:00Z' },
+  { _id: 'c1', userId: '1', userName: 'Rahul Sharma', type: 'theft', title: 'Mobile snatched near Clock Tower', description: 'Someone snatched my phone while walking near Clock Tower market area.', location: { lat: 30.3165, lng: 78.0322, address: 'Clock Tower, Dehradun' }, crimeLocation: { lat: 30.3170, lng: 78.0330, address: 'Clock Tower Market, Dehradun' }, status: 'approved', severity: 'medium', createdAt: '2024-12-10T14:30:00Z', mediaNames: ['photo1.jpg'], statusUpdates: [{ status: 'pending', timestamp: '2024-12-10T14:30:00Z' }, { status: 'approved', timestamp: '2024-12-11T09:00:00Z', note: 'Report verified by admin' }] },
+  { _id: 'c2', userId: '3', userName: 'Priya Patel', type: 'vandalism', title: 'Car window smashed at Paltan Bazaar', description: 'Parked car had window smashed overnight in Paltan Bazaar parking.', location: { lat: 30.3220, lng: 78.0390, address: 'Paltan Bazaar, Dehradun' }, crimeLocation: { lat: 30.3225, lng: 78.0395, address: 'Paltan Bazaar Parking, Dehradun' }, status: 'pending', severity: 'low', createdAt: '2024-12-12T08:00:00Z', mediaNames: ['damage.jpg', 'parking_cctv.mp4'], statusUpdates: [{ status: 'pending', timestamp: '2024-12-12T08:00:00Z' }] },
+  { _id: 'c3', userId: '4', userName: 'Amit Kumar', type: 'assault', title: 'Mugging near Sahastradhara Road', description: 'Was threatened at knifepoint near Sahastradhara Road entrance.', location: { lat: 30.3800, lng: 78.1200, address: 'Sahastradhara Road, Dehradun' }, crimeLocation: { lat: 30.3810, lng: 78.1210, address: 'Sahastradhara Road Entrance, Dehradun' }, status: 'investigating', severity: 'high', createdAt: '2024-12-14T22:15:00Z', statusUpdates: [{ status: 'pending', timestamp: '2024-12-14T22:15:00Z' }, { status: 'investigating', timestamp: '2024-12-15T10:00:00Z', note: 'Police team assigned to investigate' }] },
+  { _id: 'c4', userId: '5', userName: 'Sneha Reddy', type: 'robbery', title: 'Shop robbery at Rajpur Road', description: 'Armed robbery at jewellery shop on Rajpur Road.', location: { lat: 30.3255, lng: 78.0438, address: 'Rajpur Road, Dehradun' }, crimeLocation: { lat: 30.3260, lng: 78.0440, address: 'Rajpur Road Jewellers, Dehradun' }, status: 'approved', severity: 'high', createdAt: '2024-12-15T03:45:00Z', mediaNames: ['cctv_footage.mp4'], statusUpdates: [{ status: 'pending', timestamp: '2024-12-15T03:45:00Z' }, { status: 'approved', timestamp: '2024-12-15T12:00:00Z', note: 'FIR registered' }] },
+  { _id: 'c5', userId: '6', userName: 'Deepak Verma', type: 'fraud', title: 'ATM skimming device found at Ballupur', description: 'Found a skimming device on ATM machine near Ballupur Chowk.', location: { lat: 30.3350, lng: 78.0500, address: 'Ballupur Chowk, Dehradun' }, crimeLocation: { lat: 30.3355, lng: 78.0505, address: 'SBI ATM, Ballupur Chowk, Dehradun' }, status: 'approved', severity: 'medium', createdAt: '2024-12-16T11:20:00Z', statusUpdates: [{ status: 'pending', timestamp: '2024-12-16T11:20:00Z' }, { status: 'approved', timestamp: '2024-12-16T15:00:00Z' }] },
+  { _id: 'c6', userId: '7', userName: 'Anjali Desai', type: 'harassment', title: 'Street harassment near Dehradun Railway Station', description: 'Verbal harassment near the railway station exit.', location: { lat: 30.3183, lng: 78.0250, address: 'Dehradun Railway Station' }, crimeLocation: { lat: 30.3185, lng: 78.0255, address: 'Railway Station Exit Gate, Dehradun' }, status: 'pending', severity: 'medium', createdAt: '2024-12-17T19:30:00Z', statusUpdates: [{ status: 'pending', timestamp: '2024-12-17T19:30:00Z' }] },
 ];
 
 const notifications: Notification[] = [
@@ -59,6 +64,24 @@ const mockEmergencyServices: EmergencyService[] = [
   { _id: 'e5', name: 'Dehradun Fire Station', type: 'fire', location: { lat: 30.3200, lng: 78.0350 }, address: 'Chakrata Road, Dehradun', phone: '0135-2653534', distance: 0.6 },
   { _id: 'e6', name: 'Prem Nagar Fire Station', type: 'fire', location: { lat: 30.3500, lng: 78.0100 }, address: 'Prem Nagar, Dehradun', phone: '0135-2770101', distance: 3.5 },
 ];
+
+// Reverse geocoding using OpenStreetMap Nominatim (free, no API key needed)
+export async function reverseGeocode(lat: number, lng: number): Promise<string> {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1`, {
+      headers: { 'Accept-Language': 'en' }
+    });
+    const data = await res.json();
+    if (data.display_name) {
+      // Return a short version
+      const parts = data.display_name.split(',').slice(0, 3).map((s: string) => s.trim());
+      return parts.join(', ');
+    }
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  } catch {
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  }
+}
 
 function computeDashboardStats(): DashboardStats {
   const totalReports = crimeReports.length;
@@ -109,16 +132,21 @@ export const api = {
       phone: data.phone,
       createdAt: new Date().toISOString(),
     };
+    users.push(newUser);
     return { user: newUser, token: 'mock-jwt-token-' + newUser._id };
   },
 
   triggerSOS: async (location: { lat: number; lng: number }): Promise<SOSAlert> => {
     await delay(300);
+    const address = await reverseGeocode(location.lat, location.lng);
+    const currentUser = users.find(u => u.role === 'citizen') || users[0];
     const alert: SOSAlert = {
       _id: 'sos-' + Date.now(),
-      userId: '1',
-      userName: 'Current User',
-      location: { ...location, address: 'Current Location, Dehradun' },
+      userId: currentUser._id,
+      userName: currentUser.name,
+      userPhone: currentUser.phone,
+      userEmail: currentUser.email,
+      location: { ...location, address },
       status: 'active',
       createdAt: new Date().toISOString(),
     };
@@ -127,7 +155,7 @@ export const api = {
       _id: 'n-' + Date.now(),
       type: 'sos',
       title: 'New SOS Alert',
-      message: `SOS triggered at ${alert.location.address}`,
+      message: `SOS triggered by ${alert.userName} at ${address}`,
       read: false,
       createdAt: new Date().toISOString(),
     });
@@ -152,27 +180,35 @@ export const api = {
     return [...crimeReports];
   },
 
+  getUserReports: async (userId: string): Promise<CrimeReport[]> => {
+    await delay(300);
+    return crimeReports.filter(r => r.userId === userId);
+  },
+
   submitCrimeReport: async (data: Partial<CrimeReport>): Promise<CrimeReport> => {
     await delay(500);
     const report: CrimeReport = {
       _id: 'cr-' + Date.now(),
-      userId: '1',
-      userName: 'Current User',
+      userId: data.userId || '1',
+      userName: data.userName || 'Current User',
       type: data.type || 'other',
       title: data.title || '',
       description: data.description || '',
       location: data.location || { lat: CENTER.lat, lng: CENTER.lng },
+      crimeLocation: data.crimeLocation,
       status: 'pending',
       severity: data.severity || 'medium',
       createdAt: new Date().toISOString(),
+      mediaNames: data.mediaNames,
+      statusUpdates: [{ status: 'pending', timestamp: new Date().toISOString(), note: 'Report submitted' }],
     };
     crimeReports.unshift(report);
     heatmapPoints.push({
-      lat: report.location.lat ?? CENTER.lat,
-      lng: report.location.lng ?? CENTER.lng,
+      lat: (report.crimeLocation || report.location).lat ?? CENTER.lat,
+      lng: (report.crimeLocation || report.location).lng ?? CENTER.lng,
       intensity: report.severity === 'high' ? 0.9 : report.severity === 'medium' ? 0.6 : 0.3,
       type: report.type,
-      areaName: report.location.address || 'Unknown Area',
+      areaName: (report.crimeLocation || report.location).address || 'Unknown Area',
       incidentCount: 1,
     });
     notifications.unshift({
@@ -186,11 +222,13 @@ export const api = {
     return report;
   },
 
-  updateReportStatus: async (id: string, status: CrimeReport['status']): Promise<CrimeReport> => {
+  updateReportStatus: async (id: string, status: CrimeReport['status'], note?: string): Promise<CrimeReport> => {
     await delay(300);
     const idx = crimeReports.findIndex(r => r._id === id);
     if (idx === -1) throw new Error('Report not found');
     crimeReports[idx] = { ...crimeReports[idx], status };
+    if (!crimeReports[idx].statusUpdates) crimeReports[idx].statusUpdates = [];
+    crimeReports[idx].statusUpdates!.push({ status, timestamp: new Date().toISOString(), note });
     return crimeReports[idx];
   },
 
@@ -225,6 +263,11 @@ export const api = {
   getDashboardStats: async (): Promise<DashboardStats> => {
     await delay(300);
     return computeDashboardStats();
+  },
+
+  getUsers: async (): Promise<User[]> => {
+    await delay(300);
+    return [...users];
   },
 };
 
