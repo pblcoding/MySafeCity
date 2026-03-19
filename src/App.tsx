@@ -12,6 +12,7 @@ import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ReportCrimePage from "@/pages/ReportCrimePage";
+import MyReportsPage from "@/pages/MyReportsPage";
 import HeatmapPage from "@/pages/HeatmapPage";
 import EmergencyServicesPage from "@/pages/EmergencyServicesPage";
 import AdminDashboard from "@/pages/AdminDashboard";
