@@ -62,7 +62,7 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Simply open [Lovable](https://lovable.dev/projects/1254901b-d333-4b07-8e15-70f4339e9539) and click on Share -> Publish.
 
 ## Can I connect a custom domain to my Lovable project?
 
