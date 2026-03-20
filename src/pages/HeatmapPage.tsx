@@ -31,8 +31,13 @@ export default function HeatmapPage() {
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
-    api.getHeatmapData().then(setPoints);
-    api.getCrimeReports().then(setReports);
+    const fetchData = () => {
+      api.getHeatmapData().then(setPoints);
+      api.getCrimeReports().then(setReports);
+    };
+    fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
